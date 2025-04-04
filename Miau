@@ -1,0 +1,143 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class SinglyLinkedList {
+static int[] data = new int[10]; // Store node values
+static int[] next = new int[10]; // Store next node pointers
+static int head = -1; // Head of the list
+static int size = 0; // Current size of the list
+static int available = 0; // Next available position
+
+public static void main(String[] args) {
+    // Initialize next pointers
+    for (int i = 0; i < 9; i++) {
+        next[i] = i + 1;
+    }
+    next[9] = -1;
+
+    // GUI Setup
+    JFrame frame = new JFrame("Singly Linked List Operations");
+    frame.setSize(500, 300);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setLayout(new GridLayout(4, 1));
+
+    JLabel listLabel = new JLabel("Linked List: ", SwingConstants.CENTER);
+    JTextField inputField = new JTextField();
+    JButton addButton = new JButton("Add Node");
+    JButton removeButton = new JButton("Remove Node");
+
+    frame.add(listLabel);
+    frame.add(inputField);
+    frame.add(addButton);
+    frame.add(removeButton);
+
+    frame.setVisible(true);
+
+    // Add Node Button
+    addButton.addActionListener(new ActionListener() {
+    	public void actionPerformed(ActionEvent e) {
+    	try {
+    	String text = inputField.getText().trim();
+    	if (text.isEmpty()) {
+    	JOptionPane.showMessageDialog(frame, "Please enter a number!");
+    	return;
+    	}
+
+    	        int value = Integer.parseInt(text);
+
+    	        if (size >= 10) {
+    	            JOptionPane.showMessageDialog(frame, "List is full! Cannot add more nodes.");
+    	            return;
+    	        }
+
+    	        insert(value);
+    	        listLabel.setText("Linked List: " + display());
+    	        inputField.setText(""); // Clear input field
+    	    } catch (NumberFormatException ex) {
+    	        JOptionPane.showMessageDialog(frame, "Invalid input! Enter a valid number.");
+    	    }
+    	}
+    	});
+
+    	removeButton.addActionListener(new ActionListener() {
+    	public void actionPerformed(ActionEvent e) {
+    	try {
+    	String text = inputField.getText().trim();
+    	if (text.isEmpty()) {
+    	JOptionPane.showMessageDialog(frame, "Please enter a number to remove!");
+    	return;
+    	}
+
+    	        int value = Integer.parseInt(text);
+    	        if (size == 0) {
+    	            JOptionPane.showMessageDialog(frame, "List is empty! Cannot remove.");
+    	            return;
+    	        }
+
+    	        remove(value);
+    	        listLabel.setText("Linked List: " + display());
+    	        inputField.setText(""); // Clear input field
+    	    } catch (NumberFormatException ex) {
+    	        JOptionPane.showMessageDialog(frame, "Invalid input! Enter a valid number.");
+    	    }
+    	}
+    	});
+}
+
+// Insert node at the end
+public static void insert(int value) {
+    if (size >= 10) return;
+
+    int newIndex = available;
+    available = next[available]; // Get next available position
+    data[newIndex] = value;
+    next[newIndex] = -1;
+
+    if (head == -1) {
+        head = newIndex; // First node case
+    } else {
+        int temp = head;
+        while (next[temp] != -1) {
+            temp = next[temp];
+        }
+        next[temp] = newIndex; // Link new node at the end
+    }
+    size++;
+}
+
+// Remove node by value
+public static void remove(int value) {
+    if (head == -1) return;
+
+    int temp = head, prev = -1;
+    while (temp != -1 && data[temp] != value) {
+        prev = temp;
+        temp = next[temp];
+    }
+
+    if (temp == -1) return; // Value not found
+
+    if (prev == -1) {
+        head = next[head]; // Remove head
+    } else {
+        next[prev] = next[temp]; // Remove from middle/end
+    }
+
+    next[temp] = available; // Mark space as available
+    available = temp;
+    size--;
+}
+
+// Display linked list
+public static String display() {
+    StringBuilder result = new StringBuilder();
+    int temp = head;
+    while (temp != -1) {
+        result.append(data[temp]).append(" → ");
+        temp = next[temp];
+    }
+    return result.append("NULL").toString();
+}
+}
