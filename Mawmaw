@@ -1,0 +1,256 @@
+package Finals;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class LinkedList {
+    static int[] data = new int[10];
+    static int[] next = new int[10];
+    static int head = -1;
+    static int size = 0;
+    static int available = 0;
+
+    public static void main(String[] args) {
+        try {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Nimbus L&F not available.");
+        }
+
+        for (int i = 0; i < 9; i++) next[i] = i + 1;
+        next[9] = -1;
+
+        JFrame frame = new JFrame("Marginet linked list");
+        frame.setSize(720, 400);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(null);
+        frame.getContentPane().setBackground(Color.DARK_GRAY);
+
+        Color orange = new Color(255, 140, 0);
+        Font font = new Font("SansSerif", Font.BOLD, 14);
+
+        JLabel listLabel = new JLabel("Linked List: ");
+        listLabel.setBounds(20, 20, 680, 30);
+        listLabel.setForeground(orange);
+        listLabel.setFont(font);
+        frame.add(listLabel);
+
+        JTextField inputField = new JTextField();
+        inputField.setBounds(20, 60, 200, 35);
+        inputField.setBackground(Color.BLACK);
+        inputField.setForeground(orange);
+        inputField.setFont(font);
+        frame.add(inputField);
+
+        int bx = 240, by = 60, bw = 150, bh = 35, gapY = 45;
+
+        JButton pushBtn = createButton("Push", bx, by, bw, bh, orange, font);
+        JButton popBtn = createButton("Pop", bx + bw + 10, by, bw, bh, orange, font);
+
+        JButton removeBtn = createButton("Remove", bx, by + gapY, bw, bh, orange, font);
+        JButton deletePosBtn = createButton("Delete at Pos", bx + bw + 10, by + gapY, bw, bh, orange, font);
+
+        JButton insertMiddleBtn = createButton("Insert Middle", bx, by + 2 * gapY, bw, bh, orange, font);
+        JButton insertEndBtn = createButton("Add (End)", bx + bw + 10, by + 2 * gapY, bw, bh, orange, font);
+
+        JButton topBtn = createButton("Top", bx, by + 3 * gapY, bw, bh, orange, font);
+
+        frame.add(pushBtn);
+        frame.add(popBtn);
+        frame.add(removeBtn);
+        frame.add(deletePosBtn);
+        frame.add(insertMiddleBtn);
+        frame.add(insertEndBtn);
+        frame.add(topBtn);
+
+        // Action Listeners
+        insertEndBtn.addActionListener(e -> {
+            try {
+                int value = Integer.parseInt(inputField.getText().trim());
+                insert(value);
+                listLabel.setText("Linked List: " + display());
+                inputField.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Enter valid number!");
+            }
+        });
+
+        pushBtn.addActionListener(e -> {
+            try {
+                int value = Integer.parseInt(inputField.getText().trim());
+                push(value);
+                listLabel.setText("Linked List: " + display());
+                inputField.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Enter valid number!");
+            }
+        });
+
+        insertMiddleBtn.addActionListener(e -> {
+            try {
+                int value = Integer.parseInt(inputField.getText().trim());
+                insertMiddle(value);
+                listLabel.setText("Linked List: " + display());
+                inputField.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Enter valid number!");
+            }
+        });
+
+        popBtn.addActionListener(e -> {
+            pop();
+            listLabel.setText("Linked List: " + display());
+        });
+
+        topBtn.addActionListener(e -> {
+            if (head == -1) {
+                JOptionPane.showMessageDialog(frame, "List is empty!");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Top Element: " + data[head]);
+            }
+        });
+
+        deletePosBtn.addActionListener(e -> {
+            try {
+                int pos = Integer.parseInt(inputField.getText().trim());
+                deleteAt(pos);
+                listLabel.setText("Linked List: " + display());
+                inputField.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Enter valid position!");
+            }
+        });
+
+        removeBtn.addActionListener(e -> {
+            try {
+                int value = Integer.parseInt(inputField.getText().trim());
+                remove(value);
+                listLabel.setText("Linked List: " + display());
+                inputField.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Enter valid number!");
+            }
+        });
+
+        frame.setVisible(true);
+    }
+
+    static JButton createButton(String text, int x, int y, int w, int h, Color bg, Font font) {
+        JButton btn = new JButton(text);
+        btn.setBounds(x, y, w, h);
+        btn.setBackground(bg);
+        btn.setForeground(Color.BLACK);
+        btn.setFont(font);
+        return btn;
+    }
+
+    public static void insert(int value) {
+        if (size >= 10) return;
+        int newIndex = available;
+        available = next[available];
+        data[newIndex] = value;
+        next[newIndex] = -1;
+        if (head == -1) {
+            head = newIndex;
+        } else {
+            int temp = head;
+            while (next[temp] != -1) temp = next[temp];
+            next[temp] = newIndex;
+        }
+        size++;
+    }
+
+    public static void push(int value) {
+        if (size >= 10) return;
+        int newIndex = available;
+        available = next[available];
+        data[newIndex] = value;
+        next[newIndex] = head;
+        head = newIndex;
+        size++;
+    }
+
+    public static void pop() {
+        if (head == -1) return;
+        int temp = head;
+        head = next[head];
+        next[temp] = available;
+        available = temp;
+        size--;
+    }
+
+    public static void insertMiddle(int value) {
+        if (size >= 10) return;
+        int mid = size / 2;
+        int newIndex = available;
+        available = next[available];
+        data[newIndex] = value;
+
+        if (mid == 0) {
+            next[newIndex] = head;
+            head = newIndex;
+        } else {
+            int temp = head;
+            for (int i = 0; i < mid - 1; i++) {
+                temp = next[temp];
+            }
+            next[newIndex] = next[temp];
+            next[temp] = newIndex;
+        }
+        size++;
+    }
+
+    public static void deleteAt(int position) {
+        if (position < 0 || position >= size) return;
+
+        int temp = head, prev = -1;
+        for (int i = 0; i < position; i++) {
+            prev = temp;
+            temp = next[temp];
+        }
+
+        if (prev == -1) {
+            head = next[head];
+        } else {
+            next[prev] = next[temp];
+        }
+
+        next[temp] = available;
+        available = temp;
+        size--;
+    }
+
+    public static void remove(int value) {
+        if (head == -1) return;
+        int temp = head, prev = -1;
+        while (temp != -1 && data[temp] != value) {
+            prev = temp;
+            temp = next[temp];
+        }
+        if (temp == -1) return;
+        if (prev == -1) {
+            head = next[head];
+        } else {
+            next[prev] = next[temp];
+        }
+        next[temp] = available;
+        available = temp;
+        size--;
+    }
+
+    public static String display() {
+        StringBuilder result = new StringBuilder();
+        int temp = head;
+        while (temp != -1) {
+            result.append(data[temp]).append(" → ");
+            temp = next[temp];
+        }
+        return result.append("NULL").toString();
+    }
+}
